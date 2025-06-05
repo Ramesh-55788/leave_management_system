@@ -40,16 +40,9 @@ const getUserByEmail = async (email) => userRepo.findOne({ where: { email } });
 // Find a user by their ID
 const getUserById = async (id) => userRepo.findOne({ where: { id } });
 
-const updatePasswordByid = async (userId, password) => {
-  const user = await userRepo.findOneBy({ id: userId });
-  user.password = password;
-  await userRepo.save(user);
-}
-
 module.exports = {
   getAllUsers,
   createUser,
   getUserByEmail,
   getUserById,
-  updatePasswordByid
 };

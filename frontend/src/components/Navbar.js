@@ -12,7 +12,6 @@ function Navbar() {
 
   const links = [
     { to: '/', label: 'Home' },
-    { to: '/profile', label: 'Profile' },
   ];
 
   if (user.role === 'employee' || user.role === 'manager' || user.role === 'hr') {

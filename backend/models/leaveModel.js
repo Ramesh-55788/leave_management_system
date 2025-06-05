@@ -101,7 +101,8 @@ const requestLeave = async (
   let initialStatus;
   if (leaveTypeId === 9) {
     initialStatus = "Approved"
-  } else {
+  } 
+  else {
     initialStatus = finalApprovalLevel > 1 ? LeaveStatus.PENDING_L1 : LeaveStatus.PENDING;
   }
 

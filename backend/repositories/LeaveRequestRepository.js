@@ -67,7 +67,7 @@ const getLeaveHistoryByUserId = async (userId) => {
     relations: ['leaveType', 'user', 'user.manager'],
     order: { createdAt: 'DESC' }
   });
-
+// console.log(leaveRequests);
   return leaveRequests.map(request => ({
     id: request.id,
     leave_type: request.leaveType.name,
@@ -75,7 +75,10 @@ const getLeaveHistoryByUserId = async (userId) => {
     end_date: request.endDate,
     reason: request.reason,
     status: request.status,
-    manager_name: request.user.manager?.name || null
+    manager_name: request.user.manager?.name || null,
+    total_days: request.totalDays,
+    created_at: request.createdAt,
+    updated_at:request.statusUpdatedAt
   }));
 };
 
@@ -145,6 +148,7 @@ const updateLeaveRequestStatus = async (id, status) => {
   const leaveRequest = await leaveRequestRepo.findOne({ where: { id } });
   if (!leaveRequest) return null;
   leaveRequest.status = status;
+  leaveRequest.statusUpdatedAt = new Date();
   return leaveRequestRepo.save(leaveRequest);
 };
 

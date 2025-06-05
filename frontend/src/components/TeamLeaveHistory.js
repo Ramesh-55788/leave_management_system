@@ -50,6 +50,19 @@ function TeamLeaveHistory() {
     return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
   }
 
+  const formatDateTime = (isoString) => {
+    const date = new Date(isoString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+  
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+  
+    return `${day}-${month}-${year} ,${hours}:${minutes}:${seconds}`;
+  };
+
   return (
     <div className="team-leave-history">
       <h2>Team Leave History</h2>
@@ -64,7 +77,11 @@ function TeamLeaveHistory() {
                   <th>Type</th>
                   <th>From</th>
                   <th>To</th>
+                  <th>Reason</th>
+                  <th>TotalDays</th>
                   <th>Status</th>
+                  <th>Requested On</th>
+                  <th>Updated At</th>
                 </tr>
               </thead>
               <tbody>
@@ -73,7 +90,11 @@ function TeamLeaveHistory() {
                     <td>{leave.leave_type || leave.leaveType}</td>
                     <td>{formatDate(leave.start_date || leave.startDate)}</td>
                     <td>{formatDate(leave.end_date || leave.endDate)}</td>
+                    <td>{leave.reason || leave.reason}</td>
+                    <td>{leave.totalDays || leave.total_days}</td>
                     <td>{leave.status}</td>
+                    <td>{formatDateTime(leave.created_at || leave.createdAt)}</td>
+                    <td>{leave.updated_at ? formatDateTime(leave.updated_at) : "Not updated"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -83,6 +104,7 @@ function TeamLeaveHistory() {
           )}
         </div>
       ))}
+      
     </div>
   )
 }

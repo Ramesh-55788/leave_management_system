@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../userContext';
-import { apiPostWithRetry } from '../utils/api';
+import api from '../utils/api'; // changed import
 import axios from 'axios';
 import '../styles/login.css';
 
@@ -15,7 +15,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await apiPostWithRetry('http://localhost:5000/api/auth/login', { email, password });
+      const res = await api.post('/auth/login', { email, password }); // no retry
       login(res.data.user);
       localStorage.setItem('token', res.data.token);
       axios.defaults.headers['Authorization'] = `Bearer ${res.data.token}`;

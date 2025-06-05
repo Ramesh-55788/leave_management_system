@@ -15,7 +15,6 @@ const HalfDayType = {
   SECOND_HALF: 'PM',
 };
 
-// Schema for the LeaveRequest entity
 const LeaveRequest = new EntitySchema({
   name: "LeaveRequest",
   tableName: "leave_requests",
@@ -76,6 +75,11 @@ const LeaveRequest = new EntitySchema({
       name: "created_at",
       type: "timestamp",
       default: () => "CURRENT_TIMESTAMP",
+    },
+    statusUpdatedAt: {
+      name: "status_updated_at",
+      type: "timestamp",
+      nullable: true,
     },
   },
   relations: {

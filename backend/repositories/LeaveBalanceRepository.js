@@ -23,8 +23,8 @@ const updateLeaveBalanceByUserAndType = async (userId, leaveTypeId, year, balanc
 
   if (!leaveBalance) return null;
 
-  leaveBalance.balance +=  Number(balanceChange);
-  leaveBalance.used +=  Number(usedChange)
+  leaveBalance.balance += Number(balanceChange);
+  leaveBalance.used += Number(usedChange);
 
   return leaveBalanceRepo.save(leaveBalance);
 };

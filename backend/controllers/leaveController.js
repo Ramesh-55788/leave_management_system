@@ -61,12 +61,19 @@ const fetchLeaveBalance = async (req, res) => {
     }
 
     let totalBalance = 0, totalLeaves = 0;
+
     const leaveDetails = balance.map(item => {
-      totalBalance += item.balance;
-      totalLeaves += (item.balance + item.used);
+      const isSpecialType = item.leaveTypeId === 9 || item.leaveTypeId === 10;
+      const total = item.balance + item.used;
+
+      if (!isSpecialType) {
+        totalBalance += item.balance;
+        totalLeaves += total;
+      }
+
       return {
         leave_type: item.leaveType.name,
-        total: item.balance + item.used,
+        total,
         balance: item.balance,
         used: item.used
       };

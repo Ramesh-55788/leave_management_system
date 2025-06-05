@@ -59,6 +59,12 @@
     font-size: 14px;
   }
   
+  .infinity-symbol {
+    font-size: 25px;
+    font-weight: 300;
+    fill: #333;
+  }
+
   .leave-card-footer div p {
     margin: 0;
     color: #777;

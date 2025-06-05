@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { UserProvider } from './userContext';
 import Login from './pages/Login';
 import Home from './pages/Home';
-import Profile from './components/Profile';
 import RequestLeave from './components/RequestLeave';
 import AddUser from './components/AddUser';
 import Navbar from './components/Navbar';
@@ -27,7 +26,6 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/profile" element={<Profile />} />
           <Route path="/login" element={<Login />} />
           <Route path="/request-leave" element={<RequestLeave />} />
           <Route path="/leave-balance" element={<LeaveBalance />} />

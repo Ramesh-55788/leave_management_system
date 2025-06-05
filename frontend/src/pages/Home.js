@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { useUser } from '../userContext';
@@ -14,16 +14,7 @@ function Home() {
   const [loading, setLoading] = useState({ incoming: true });
   const [error, setError] = useState({ incoming: null });
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    fetchIncomingRequests();
-    fetchAllUsersInTeam();
-  }, [user, navigate]);
-
-  const fetchIncomingRequests = async () => {
+  const fetchIncomingRequests = useCallback(async () => {
     if (!user || user.role === "employee") {
       setLoading(prev => ({ ...prev, incoming: false }));
       return;
@@ -37,24 +28,35 @@ function Home() {
     } finally {
       setLoading(prev => ({ ...prev, incoming: false }));
     }
-  };
+  }, [user]);
 
-  const fetchAllUsersInTeam = async () => {
+  const fetchAllUsersInTeam = useCallback(async () => {
     try {
       const res = await api.get('/auth/users');
       const currentManagerId = user.id;
       const UsersManagerId = user.managerId;
       let teamMembers;
       if (user.role !== 'admin') {
-        teamMembers = res.data.users.filter(u => u.managerId === currentManagerId || (u.managerId === UsersManagerId && user.role === 'employee'));
+        teamMembers = res.data.users.filter(
+          u => u.managerId === currentManagerId || 
+               (u.managerId === UsersManagerId)
+        );
       } else {
         teamMembers = res.data.users;
       }
       setTeamMembers(teamMembers);
     } catch {
-      // No state update needed here
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    fetchIncomingRequests();
+    fetchAllUsersInTeam();
+  }, [user, navigate, fetchIncomingRequests, fetchAllUsersInTeam]);
 
   const fetchTeamLeaveData = async (teamMemberIds, month, year) => {
     try {
@@ -76,16 +78,37 @@ function Home() {
     try {
       await api.put(`/leave/${action}/${requestId}`);
       alert(`Request ${action}ed successfully`);
-      setIncomingRequests(prev => prev.map(req => req.id === requestId ? { ...req, status: action === 'approve' ? 'Approved' : 'Rejected' } : req));
+      setIncomingRequests(prev =>
+        prev.map(req =>
+          req.id === requestId
+            ? { ...req, status: action === 'approve' ? 'Approved' : 'Rejected' }
+            : req
+        )
+      );
     } catch {
       alert(`Failed to ${action} request`);
     }
   };
 
-  const formatDate = (date) => new Date(date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  const formatDate = (date) =>
+    new Date(date).toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
 
   if (!user) return null;
-  if (user.role === "admin") return <Admin user={user} logout={logout} teamMembers={teamMembers} fetchTeamLeaveData={fetchTeamLeaveData} />;
+
+  if (user.role === "admin") {
+    return (
+      <Admin
+        user={user}
+        logout={logout}
+        teamMembers={teamMembers}
+        fetchTeamLeaveData={fetchTeamLeaveData}
+      />
+    );
+  }
 
   return (
     <div className="employee-home">

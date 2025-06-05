@@ -6,6 +6,7 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [teamLeaveData, setTeamLeaveData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   const leaveTypeColors = {
     'Casual Leave': '#4CAF50',
@@ -16,7 +17,7 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
     'Emergency Leave': '#F44336',
     'Loss of Pay': '#FF9800',
   };
-  
+
   const legendItems = [
     { type: 'Casual Leave', color: '#4CAF50', marker: false },
     { type: 'Sick Leave', color: '#060270', marker: false },
@@ -44,17 +45,66 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
       setLoading(true);
       try {
         if (fetchTeamLeaveData) {
-          const data = await fetchTeamLeaveData(
-            teamMembers.map(member => member.id),
-            selectedMonth + 1,
-            selectedYear
+          // Calculate previous and next month for cross-month leave handling
+          const prevMonth = selectedMonth === 0 ? 12 : selectedMonth;
+          const prevYear = selectedMonth === 0 ? selectedYear - 1 : selectedYear;
+          const nextMonth = selectedMonth === 11 ? 1 : selectedMonth + 2;
+          const nextYear = selectedMonth === 11 ? selectedYear + 1 : selectedYear;
+
+          // Fetch data for previous, current, and next month to handle cross-month leaves
+          const [prevMonthData, currentMonthData, nextMonthData] = await Promise.all([
+            fetchTeamLeaveData(
+              teamMembers.map(member => member.id),
+              prevMonth,
+              prevYear
+            ).catch(() => []),
+            fetchTeamLeaveData(
+              teamMembers.map(member => member.id),
+              selectedMonth + 1,
+              selectedYear
+            ).catch(() => []),
+            fetchTeamLeaveData(
+              teamMembers.map(member => member.id),
+              nextMonth,
+              nextYear
+            ).catch(() => [])
+          ]);
+
+          // Combine all leave data and filter for leaves that intersect with current month
+          const allLeaveData = [
+            ...(prevMonthData || []),
+            ...(currentMonthData || []),
+            ...(nextMonthData || [])
+          ];
+
+          // Filter leaves that overlap with the current month being displayed
+          const currentMonthStart = new Date(selectedYear, selectedMonth, 1);
+          const currentMonthEnd = new Date(selectedYear, selectedMonth + 1, 0);
+
+          const relevantLeaves = allLeaveData.filter(leave => {
+            const leaveStart = new Date(leave.lr_start_date);
+            const leaveEnd = new Date(leave.lr_end_date);
+            
+            // Check if leave overlaps with current month
+            return leaveStart <= currentMonthEnd && leaveEnd >= currentMonthStart;
+          });
+
+          // Remove duplicates based on unique identifier (assuming each leave has a unique ID)
+          const uniqueLeaves = relevantLeaves.filter((leave, index, self) => 
+            index === self.findIndex(l => 
+              l.lr_user_id === leave.lr_user_id && 
+              l.lr_start_date === leave.lr_start_date && 
+              l.lr_end_date === leave.lr_end_date &&
+              l.leaveTypeName === leave.leaveTypeName
+            )
           );
-          setTeamLeaveData(data || []);
+
+          setTeamLeaveData(uniqueLeaves);
         } else {
           setTeamLeaveData([]);
         }
       } catch (error) {
-        console.error("Error fetching team leave data:", error);
+        console.error('Error loading team leave data:', error);
         setTeamLeaveData([]);
       } finally {
         setLoading(false);
@@ -62,7 +112,23 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
     };
 
     loadTeamLeaveData();
+
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, [selectedMonth, selectedYear, teamMembers, fetchTeamLeaveData]);
+
+  const formatLiveTime = (date) => {
+    const options = { weekday: 'long' };
+    const day = new Intl.DateTimeFormat('en-US', options).format(date);
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'pm' : 'am';
+    hours = hours % 12 || 12;
+    return `${day} ${hours}:${minutes} ${ampm}`;
+  };
 
   const getDaysInMonth = (month, year) => {
     return new Date(year, month + 1, 0).getDate();
@@ -94,7 +160,7 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
     const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
     const firstDay = getFirstDayOfMonth(selectedMonth, selectedYear);
     const headers = [];
-    
+
     for (let i = 0; i < firstDay; i++) {
       headers.push(
         <th key={`empty-${i}`} className="date-header empty-date"></th>
@@ -114,7 +180,7 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
 
     const totalCells = Math.ceil((daysInMonth + firstDay) / 7) * 7;
     const remainingCells = totalCells - (daysInMonth + firstDay);
-    
+
     for (let i = 0; i < remainingCells; i++) {
       headers.push(
         <th key={`empty-end-${i}`} className="date-header empty-date"></th>
@@ -152,9 +218,16 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
         const currentDate = new Date(selectedYear, selectedMonth, i);
         const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
 
+        // Find leave that covers this date
         const leave = memberLeaves.find(leave => {
           const start = new Date(leave.lr_start_date);
           const end = new Date(leave.lr_end_date);
+          
+          // Set time to start of day for accurate comparison
+          start.setHours(0, 0, 0, 0);
+          end.setHours(23, 59, 59, 999);
+          currentDate.setHours(12, 0, 0, 0); 
+          
           return currentDate >= start && currentDate <= end;
         });
 
@@ -164,7 +237,7 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
               <div
                 className="leave-indicator"
                 style={{ backgroundColor: leaveTypeColors[leave.leaveTypeName] || '#9CA3AF' }}
-                title={leave.leaveTypeName}
+                title={`${leave.leaveTypeName} (${new Date(leave.lr_start_date).toLocaleDateString()} - ${new Date(leave.lr_end_date).toLocaleDateString()})`}
               />
             )}
           </td>
@@ -173,7 +246,7 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
 
       const totalCells = Math.ceil((daysInMonth + firstDay) / 7) * 7;
       const remainingCells = totalCells - (daysInMonth + firstDay);
-      
+
       for (let i = 0; i < remainingCells; i++) {
         dayCells.push(
           <td key={`empty-end-${i}`} className="calendar-cell empty-cell"></td>
@@ -230,17 +303,16 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
   return (
     <div className="team-calendar-container">
       <div className="calendar-header">
-        <h2 className="calendar-title">Team calendar</h2>
-        <div className="month-selector">
-          <button onClick={handlePrevMonth} className="nav-button">
-            ◀
-          </button>
-          <span className="month-year">
-            {monthNames[selectedMonth]} {selectedYear}
+        <h2 className="calendar-title">
+          Team calendar
+          <span className="live-time">
+            {formatLiveTime(currentTime)}
           </span>
-          <button onClick={handleNextMonth} className="nav-button">
-            ▶
-          </button>
+        </h2>
+        <div className="month-selector">
+          <button onClick={handlePrevMonth} className="nav-button">◀</button>
+          <span className="month-year">{monthNames[selectedMonth]} {selectedYear}</span>
+          <button onClick={handleNextMonth} className="nav-button">▶</button>
         </div>
       </div>
 
@@ -272,6 +344,6 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
       )}
     </div>
   );
-};
+}
 
 export default Calendar;

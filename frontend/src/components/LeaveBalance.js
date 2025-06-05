@@ -22,14 +22,22 @@ function LeaveBalance() {
       });
   }, [user]);
 
+  const isInfinite = (type) => type === 'Emergency Leave' || type === 'Loss of Pay';
+
   const totalUsed = leaveDetails.reduce((sum, d) => sum + d.used, 0);
-  const totalAvailable = leaveDetails.reduce((sum, d) => sum + d.balance, 0) - totalUsed;
+  const totalAvailable = leaveDetails
+    .filter(d => !isInfinite(d.leave_type))
+    .reduce((sum, d) => sum + d.balance, 0);
 
   const renderLeaveCard = (detail) => {
     const used = detail.used;
     const available = detail.balance;
     const total = detail.total;
-    const percentage = total === 0 ? 0 : Math.min((used / total) * 100, 100);
+    const infinite = isInfinite(detail.leave_type);
+    const percentage = infinite ? 0 : total === 0 ? 0 : Math.min(used / total, 1);
+    const circumference = 2 * Math.PI * 18;
+    const strokeValue = circumference * percentage;
+    const strokeOffset = 0;
 
     return (
       <div className="leave-card" key={detail.leave_type}>
@@ -42,19 +50,21 @@ function LeaveBalance() {
               cx="21"
               cy="21"
               r="18"
-              strokeDasharray={`${percentage}, 100`}
-              strokeDashoffset="25"
-              transform="rotate(90 21 21)"
+              strokeDasharray={`${strokeValue} ${circumference}`}
+              strokeDashoffset={strokeOffset}
+              transform="rotate(-90 21 21)"
             />
             <text x="21" y="23" className="percentage">
-              {available} Days
+              {infinite ? '∞ Days' : `${Math.round(percentage * 100)}%`}
             </text>
           </svg>
         </div>
         <div className="leave-card-footer">
           <div>
             <p>Available</p>
-            <strong>{available}</strong>
+            <strong className={infinite ? 'infinity-symbol' : ''}>
+              {infinite ? '∞' : available}
+            </strong>
           </div>
           <div>
             <p>Consumed</p>
@@ -75,7 +85,7 @@ function LeaveBalance() {
 
       <div className="summary-card">
         <div className="summary-box used">
-          <p>Total Leaves Used</p>
+          <p>Total Leaves Consumed</p>
           <h1>{totalUsed}</h1>
         </div>
         <div className="summary-box available">

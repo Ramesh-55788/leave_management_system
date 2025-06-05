@@ -8,20 +8,21 @@ function LeaveRequest({ onRequestSuccess }) {
   const { user } = useUser();
   const navigate = useNavigate();
 
+  const today = new Date().toISOString().split('T')[0];
+
   const [leaveTypeId, setLeaveTypeId] = useState('');
   const [leaveTypes, setLeaveTypes] = useState([]);
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
-  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(today);
   const [isHalfDay, setIsHalfDay] = useState(false);
   const [halfDayType, setHalfDayType] = useState('');
   const [reason, setReason] = useState('');
-  const [totalDays,setTotalDays] = useState('')
+  const [totalDays, setTotalDays] = useState('');
 
-  // Fetch leave types when the component mounts
   useEffect(() => {
     api.get('/leave/types')
       .then((res) => setLeaveTypes(res.data))
-      .catch((err) => console.error('Error fetching leave types:', err));
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -30,32 +31,27 @@ function LeaveRequest({ onRequestSuccess }) {
         setTotalDays(0);
         return;
       }
-  
+
       const start = new Date(startDate);
       const end = new Date(endDate);
       if (end < start) {
         setTotalDays(0);
         return;
       }
-  
+
       let dayCount = 0;
       let current = new Date(start);
       while (current <= end) {
-        const dayOfWeek = current.getDay(); // 0 = Sunday, 6 = Saturday
-        if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-          dayCount++;
-        }
+        dayCount++;
         current.setDate(current.getDate() + 1);
       }
-  
+
       setTotalDays(isHalfDay ? 0.5 : dayCount);
     };
-  
+
     calculateLeaveDays();
   }, [startDate, endDate, isHalfDay]);
-  
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -66,6 +62,16 @@ function LeaveRequest({ onRequestSuccess }) {
 
     if (new Date(endDate) < new Date(startDate)) {
       alert('End date cannot be before start date.');
+      return;
+    }
+
+    if (!isHalfDay && totalDays === 0) {
+      alert('Selected date range includes no working days.');
+      return;
+    }
+
+    if (isHalfDay && totalDays !== 1) {
+      alert('Half-day leave can only be applied for a single day.');
       return;
     }
 
@@ -80,9 +86,9 @@ function LeaveRequest({ onRequestSuccess }) {
         reason,
         totalDays
       });
-      
+
       const requestId = res.data.insertId;
-            
+
       if (parseInt(leaveTypeId) === 9 && requestId) {
         await api.put(`/leave/approve/${requestId}`);
       }
@@ -91,22 +97,19 @@ function LeaveRequest({ onRequestSuccess }) {
       onRequestSuccess?.();
 
       setLeaveTypeId('');
-      setStartDate('');
-      setEndDate('');
+      setStartDate(today);
+      setEndDate(today);
       setIsHalfDay(false);
       setHalfDayType('');
       setReason('');
 
       navigate('/');
-
-    } 
+    }
     catch (err) {
-      if (err.response && err.response.data && err.response.data.error) {
+      if (err.response?.data?.error) {
         alert(err.response.data.error);
         return;
-      } 
-      else {
-        console.error('Error submitting leave request:', err);
+      } else {
         alert('Error submitting leave request');
         return;
       }
@@ -135,6 +138,7 @@ function LeaveRequest({ onRequestSuccess }) {
         className="leave-request-input"
         type="date"
         value={startDate}
+        min={today}
         onChange={(e) => setStartDate(e.target.value)}
         required
       />
@@ -144,7 +148,7 @@ function LeaveRequest({ onRequestSuccess }) {
         className="leave-request-input"
         type="date"
         value={endDate}
-        min={startDate}
+        min={startDate || today}
         onChange={(e) => setEndDate(e.target.value)}
         required
       />
@@ -183,10 +187,7 @@ function LeaveRequest({ onRequestSuccess }) {
         required
       />
 
-      <p className="leave-request-days">
-        Total Leave Days: {totalDays}
-      </p>
-
+      <p className="leave-request-days">Total Leave Days: {totalDays}</p>
 
       <div className="leave-request-button-container">
         <button className="leave-request-submit-btn" type="submit">Submit Request</button>

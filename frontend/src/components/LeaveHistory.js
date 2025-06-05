@@ -15,13 +15,26 @@ function LeaveHistory() {
 
   useEffect(() => {
     if (userLoading) return;
-  
+
     if (!user) {
       navigate('/login');
       return;
     }
+
+    const fetchLeaveHistory = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get(`/leave/history/${user.id}`);
+        setLeaveHistory(res.data.leaveHistory || []);
+      } catch (err) {
+        console.error('Failed to fetch leave history:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchLeaveHistory();
-  }, [user, userLoading]);
+  }, [user, userLoading, navigate]);
 
   const fetchLeaveHistory = async () => {
     setLoading(true);
@@ -52,6 +65,19 @@ function LeaveHistory() {
   const formatDate = (isoString) => {
     const date = new Date(isoString);
     return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+  };
+
+  const formatDateTime = (isoString) => {
+    const date = new Date(isoString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${day}-${month}-${year} ,${hours}:${minutes}:${seconds}`;
   };
 
   const formatStatus = (status) => {
@@ -104,6 +130,8 @@ function LeaveHistory() {
               <th>From</th>
               <th>To</th>
               <th>Status</th>
+              <th>Requested On</th>
+              <th>Updated At</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -114,6 +142,8 @@ function LeaveHistory() {
                 <td>{formatDate(leave.start_date)}</td>
                 <td>{formatDate(leave.end_date)}</td>
                 <td>{formatStatus(leave.status)}</td>
+                <td>{formatDateTime(leave.created_at)}</td>
+                <td>{leave.updated_at ? formatDateTime(leave.updated_at) : "Not updated"}</td>
                 <td>
                   <button onClick={() => openModal(leave)} className="view-button">View Request</button>
                 </td>
@@ -130,18 +160,20 @@ function LeaveHistory() {
             <p><strong>Leave Type:</strong> {selectedLeave.leave_type}</p>
             <p><strong>From:</strong> {formatDate(selectedLeave.start_date)}</p>
             <p><strong>To:</strong> {formatDate(selectedLeave.end_date)}</p>
+            <p><strong>Total Days:</strong> {selectedLeave.total_days}</p>
             <p><strong>Reported to:</strong> {selectedLeave.manager_name || 'N/A'}</p>
             <p><strong>Status:</strong> {formatStatus(selectedLeave.status)}</p>
             <p><strong>Reason:</strong> {selectedLeave.reason || 'N/A'}</p>
 
-            {(selectedLeave.status.toLowerCase() !== "cancelled" && selectedLeave.status.toLowerCase() !== "rejected" && 
-            selectedLeave.status.toLowerCase() !== "approved" && new Date(selectedLeave.start_date) > new Date()) && (
+            {(
+              (selectedLeave.status.toLowerCase().includes("pending")) ||
+              (selectedLeave.status.toLowerCase() === "approved" && new Date(selectedLeave.start_date) > new Date())
+            ) && (
                 <button onClick={() => handleCancel(selectedLeave.id)} className="cancel-button">
                   Cancel Leave
                 </button>
               )}
-              
-              
+
             <button onClick={closeModal} className="close-button">Close</button>
           </div>
         </div>
