@@ -1,0 +1,220 @@
+import React, { useState, useEffect } from 'react';
+import api from '../utils/api';
+import { useUser } from '../userContext';
+import { useNavigate } from 'react-router-dom';
+import '../styles/requestleave.css';
+
+function LeaveRequest({ onRequestSuccess }) {
+  const { user } = useUser();
+  const navigate = useNavigate();
+
+  const today = new Date().toISOString().split('T')[0];
+
+  const [leaveTypeId, setLeaveTypeId] = useState('');
+  const [leaveTypes, setLeaveTypes] = useState([]);
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(today);
+  const [isHalfDay, setIsHalfDay] = useState(false);
+  const [halfDayType, setHalfDayType] = useState('');
+  const [reason, setReason] = useState('');
+  const [totalDays, setTotalDays] = useState('');
+
+  useEffect(() => {
+    api.get('/leave/types')
+      .then((res) => setLeaveTypes(res.data))
+      .catch(() => { });
+  }, []);
+
+  useEffect(() => {
+    const calculateLeaveDays = () => {
+      if (!startDate || !endDate) {
+        setTotalDays(0);
+        return;
+      }
+
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      if (end < start) {
+        setTotalDays(0);
+        return;
+      }
+
+      let dayCount = 0;
+      let current = new Date(start);
+
+      while (current <= end) {
+        const day = current.getDay();
+        const isWeekend = day === 0 || day === 6;
+        const isSandwiched = current > start && current < end && isWeekend;
+        dayCount += isWeekend ? (isSandwiched ? 1 : 0) : 1;
+        current.setDate(current.getDate() + 1);
+      }
+
+      setTotalDays(isHalfDay ? 0.5 : dayCount);
+    };
+
+    calculateLeaveDays();
+  }, [startDate, endDate, isHalfDay]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!leaveTypeId || !startDate || !endDate || !reason || (isHalfDay && !halfDayType)) {
+      alert('Please fill all required fields.');
+      return;
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (end < start) {
+      alert('End date cannot be before start date.');
+      return;
+    }
+
+    if (!isHalfDay && totalDays === 0) {
+      alert('Selected date range includes no working days.');
+      return;
+    }
+
+    if (isHalfDay && totalDays !== 0.5) {
+      alert('Half-day leave can only be applied for a single day.');
+      return;
+    }
+
+    const rangeDays = [];
+    const cursor = new Date(start);
+    while (cursor <= end) {
+      rangeDays.push(new Date(cursor));
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    const weekendsOnly = rangeDays.every((d) => d.getDay() === 0 || d.getDay() === 6);
+
+    if (weekendsOnly) {
+      alert('Leave cannot be applied only for Saturday/Sunday.');
+      return;
+    }
+
+    try {
+      const res = await api.post('/leave/request', {
+        userId: user.id,
+        leaveTypeId,
+        startDate,
+        endDate,
+        isHalfDay,
+        halfDayType: isHalfDay ? halfDayType : null,
+        reason,
+        totalDays
+      });
+
+      const requestId = res.data.insertId;
+
+      if (parseInt(leaveTypeId) === 6 && requestId) {
+        await api.put(`/leave/approve/${requestId}`);
+      }
+
+      alert('Leave requested successfully');
+      onRequestSuccess?.();
+
+      setLeaveTypeId('');
+      setStartDate(today);
+      setEndDate(today);
+      setIsHalfDay(false);
+      setHalfDayType('');
+      setReason('');
+
+      navigate('/');
+    }
+    catch (err) {
+      if (err.response?.data?.error) {
+        alert(err.response.data.error);
+        return;
+      } else {
+        alert('Error submitting leave request');
+        return;
+      }
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="leave-request-form">
+      <h3 className="leave-request-title">Request Leave</h3>
+
+      <label className="leave-request-label">Leave Type:</label>
+      <select
+        className="leave-request-input"
+        value={leaveTypeId}
+        onChange={(e) => setLeaveTypeId(e.target.value)}
+        required
+      >
+        <option value="">Select</option>
+        {leaveTypes.map((type) => (
+          <option key={type.id} value={type.id}>{type.name}</option>
+        ))}
+      </select>
+
+      <label className="leave-request-label">Start Date:</label>
+      <input
+        className="leave-request-input"
+        type="date"
+        value={startDate}
+        min={today}
+        onChange={(e) => setStartDate(e.target.value)}
+        required
+      />
+
+      <label className="leave-request-label">End Date:</label>
+      <input
+        className="leave-request-input"
+        type="date"
+        value={endDate}
+        min={startDate || today}
+        onChange={(e) => setEndDate(e.target.value)}
+        required
+      />
+
+      <label className="leave-request-checkbox-label">
+        <input
+          className="leave-request-checkbox"
+          type="checkbox"
+          checked={isHalfDay}
+          onChange={(e) => setIsHalfDay(e.target.checked)}
+        />
+        Half Day
+      </label>
+
+      {isHalfDay && (
+        <>
+          <label className="leave-request-label">Half Day Type:</label>
+          <select
+            className="leave-request-input"
+            value={halfDayType}
+            onChange={(e) => setHalfDayType(e.target.value)}
+            required
+          >
+            <option value="">Select</option>
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+          </select>
+        </>
+      )}
+
+      <label className="leave-request-label">Reason:</label>
+      <textarea
+        className="leave-request-textarea"
+        value={reason}
+        onChange={(e) => setReason(e.target.value)}
+        required
+      />
+
+      <p className="leave-request-days">Total Leave Days: {totalDays}</p>
+
+      <div className="leave-request-button-container">
+        <button className="leave-request-submit-btn" type="submit">Submit Request</button>
+      </div>
+    </form>
+  );
+}
+
+export default LeaveRequest;

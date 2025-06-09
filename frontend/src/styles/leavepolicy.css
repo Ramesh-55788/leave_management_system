@@ -1,0 +1,387 @@
+/* Leave Policy Styles */
+.leave-policy-container {
+  /* max-width: 1500px; */
+  margin: 0 auto;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.leave-policy-container h3 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  text-align: center;
+  margin-bottom: 3rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.leave-policy-container h3::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  border-radius: 2px;
+}
+
+.leaves-section {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.leave-types-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.leave-card {
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+.leave-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px 16px 0 0;
+}
+
+.leave-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 
+    0 16px 48px rgba(0, 0, 0, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.add-leave-card {
+  border: 2px dashed #667eea;
+  background: linear-gradient(145deg, #f8f9ff 0%, #ffffff 100%);
+}
+
+.add-leave-card::before {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  opacity: 0.7;
+}
+
+.leave-card-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.add-card-header {
+  border-bottom-color: rgba(102, 126, 234, 0.2);
+}
+
+.leave-name-input {
+  width: 100%;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 0.5rem 0;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.leave-name-input:focus {
+  border-bottom-color: #667eea;
+  color: #667eea;
+}
+
+.leave-name-input::placeholder {
+  color: #6c757d;
+  opacity: 0.7;
+}
+
+.leave-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.leave-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.leave-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #495057;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.leave-input,
+.leave-select {
+  padding: 0.75rem 1rem;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  font-size: 1rem;
+  background: #ffffff;
+  transition: all 0.3s ease;
+  outline: none;
+  color: #495057;
+}
+
+.leave-input:focus,
+.leave-select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  transform: translateY(-1px);
+}
+
+.leave-input:hover,
+.leave-select:hover {
+  border-color: #ced4da;
+}
+
+.leave-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+.leave-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.save-btn,
+.delete-btn,
+.add-btn {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.save-btn {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+.save-btn:active {
+  transform: translateY(0);
+}
+
+.delete-btn {
+  background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.delete-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+}
+
+.delete-btn:active {
+  transform: translateY(0);
+}
+
+.add-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.add-btn:active {
+  transform: translateY(0);
+}
+
+.add-leave-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  border: 2px dashed #ced4da;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #f8f9fa 0%, #ffffff 100%);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.add-leave-btn:hover {
+  border-color: #667eea;
+  background: linear-gradient(145deg, #f8f9ff 0%, #ffffff 100%);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+}
+
+.add-leave-btn .add-btn {
+  font-size: 1rem;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  min-width: 200px;
+}
+
+/* Button loading states */
+.save-btn:disabled,
+.delete-btn:disabled,
+.add-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .leave-policy-container {
+    padding: 1rem;
+  }
+  
+  .leave-policy-container h3 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .leaves-section {
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+  
+  .leave-types-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .leave-card {
+    padding: 1.25rem;
+  }
+  
+  .leave-actions {
+    flex-direction: column;
+  }
+  
+  .save-btn,
+  .delete-btn,
+  .add-btn {
+    flex: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .leave-policy-container {
+    padding: 0.75rem;
+  }
+  
+  .leave-policy-container h3 {
+    font-size: 1.75rem;
+  }
+  
+  .leaves-section {
+    padding: 1rem;
+  }
+  
+  .leave-card {
+    padding: 1rem;
+  }
+}
+
+/* Animation keyframes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.leave-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.leave-card:nth-child(even) {
+  animation-delay: 0.1s;
+}
+
+.leave-card:nth-child(odd) {
+  animation-delay: 0.2s;
+}
+
+/* Focus styles for accessibility */
+.leave-input:focus,
+.leave-select:focus,
+.save-btn:focus,
+.delete-btn:focus,
+.add-btn:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .leave-policy-container {
+    background: white;
+    box-shadow: none;
+  }
+  
+  .leave-card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+  
+  .save-btn,
+  .delete-btn,
+  .add-btn,
+  .add-leave-btn {
+    display: none;
+  }
+}
