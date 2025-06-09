@@ -2,10 +2,11 @@ const { AppDataSource } = require('../config/db');
 const { User } = require('../entities/User');
 const userRepo = AppDataSource.getRepository(User);
 const { LeaveType } = require('../entities/LeaveType');
-const { LeaveBalance } = require('../entities/LeaveBalance')
+const { LeaveBalance } = require('../entities/LeaveBalance');
 const leaveBalanceRepo = AppDataSource.getRepository(LeaveBalance);
 const leaveTypeRepo = AppDataSource.getRepository(LeaveType);
- 
+const bcrypt = require('bcrypt');
+
 const users = [
   {
     name: 'admin1',
@@ -24,9 +25,9 @@ const users = [
     created_at: '2025-04-16 17:59:21'
   },
   {
-    name: 'user1',
-    email: 'user1@gmail.com',
-    password: 'user1password',
+    name: 'employee1',
+    email: 'employee1@gmail.com',
+    password: 'employee1password',
     role: 'employee',
     managerId: 2,
     created_at: '2025-04-16 18:02:02'
@@ -40,14 +41,13 @@ const users = [
     created_at: '2025-04-17 09:30:20'
   },
   {
-    name: 'user2',
-    email: 'user2@gmail.com',
-    password: 'user2password',
+    name: 'employee2',
+    email: 'employee2@gmail.com',
+    password: 'employee2password',
     role: 'employee',
     managerId: 4,
     created_at: '2025-04-17 09:32:48'
   },
- 
   {
     name: 'hr1',
     email: 'hr1@gmail.com',
@@ -57,27 +57,27 @@ const users = [
     created_at: '2025-04-21 15:09:55'
   },
 ];
- 
+
 async function seedUsers() {
   const existingUsers = await userRepo.find();
   if (existingUsers.length > 0) {
     console.log('Users already exist. Skipping users seeding...');
     return;
   }
- 
+
   const savedUsersMap = {};
- 
-  //Insert users without managerId
-  for (const { managerId, ...userData } of users) {
-    const user = userRepo.create(userData);
+
+  // Insert users with hashed passwords
+  for (const { managerId, password, ...userData } of users) {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = userRepo.create({ ...userData, password: hashedPassword });
     const savedUser = await userRepo.save(user);
     savedUsersMap[savedUser.email] = savedUser;
   }
- 
-  //Update users with managerId
+
+  // Update users with managerId
   for (const userData of users) {
     if (userData.managerId !== null) {
-      // Find the saved user and update managerId
       const user = await userRepo.findOneBy({ email: userData.email });
       if (user) {
         user.managerId = userData.managerId;
@@ -85,11 +85,11 @@ async function seedUsers() {
       }
     }
   }
- 
-  //Seed leave balances
+
+  // Seed leave balances
   const leaveTypes = await leaveTypeRepo.find();
   const currentYear = new Date().getFullYear();
- 
+
   for (const user of await userRepo.find()) {
     const leaveBalances = leaveTypes.map((lt) =>
       leaveBalanceRepo.create({
@@ -102,9 +102,8 @@ async function seedUsers() {
     );
     await leaveBalanceRepo.save(leaveBalances);
   }
- 
+
   console.log('User data and leave balances seeded successfully!');
 }
- 
- 
+
 module.exports = seedUsers;

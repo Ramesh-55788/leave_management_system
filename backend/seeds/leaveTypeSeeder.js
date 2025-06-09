@@ -1,4 +1,3 @@
- 
 const { AppDataSource } = require('../config/db');
 const { LeaveType } = require('../entities/LeaveType');
  
@@ -10,8 +9,8 @@ const leaveTypes = [
     { id: 3, name: "Paid Leave", maxPerYear: 16, multiApprover: 2 },
     { id: 4, name: "Maternity Leave", maxPerYear: 20, multiApprover: 3 },
     { id: 5, name: "Paternity Leave", maxPerYear: 20, multiApprover: 3 },
-    { id: 9, name: "Emergency Leave", maxPerYear: 15, multiApprover: 0 },
-    { id: 10, name: "Loss of Pay", maxPerYear: 20, multiApprover: 1 }
+    { id: 6, name: "Emergency Leave", maxPerYear: 15, multiApprover: 0 },
+    { id: 7, name: "Loss of Pay", maxPerYear: 20, multiApprover: 1 }
   ];
  
 async function seedLeaveTypes() {

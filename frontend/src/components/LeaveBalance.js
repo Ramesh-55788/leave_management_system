@@ -40,7 +40,7 @@ function LeaveBalance() {
     const strokeOffset = 0;
 
     return (
-      <div className="leave-card" key={detail.leave_type}>
+      <div className="leave-card" key={`${user.id}-${detail.leave_type}`}>
         <h3>{detail.leave_type}</h3>
         <div className="donut">
           <svg viewBox="0 0 42 42">

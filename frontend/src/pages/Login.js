@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../userContext';
-import api from '../utils/api'; // changed import
+import api from '../utils/api';
 import axios from 'axios';
 import '../styles/login.css';
 
@@ -20,7 +20,9 @@ function Login() {
       localStorage.setItem('token', res.data.token);
       axios.defaults.headers['Authorization'] = `Bearer ${res.data.token}`;
       navigate('/');
-    } catch (error) {
+    }
+    catch (error) {
+      console.error('Login error:', error.response?.data);
       if (error.response) {
         setError(error.response.data.error || 'Login failed. Please try again.');
       } else {
@@ -36,22 +38,22 @@ function Login() {
       <form onSubmit={handleSubmit} className="login-form">
         <div className="form-group">
           <label>Email:</label>
-          <input 
-            type="email" 
-            value={email} 
-            onChange={(e) => setEmail(e.target.value)} 
-            required 
-            className="form-input" 
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="form-input"
           />
         </div>
         <div className="form-group">
           <label>Password:</label>
-          <input 
-            type="password" 
-            value={password} 
-            onChange={(e) => setPassword(e.target.value)} 
-            required 
-            className="form-input" 
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="form-input"
           />
         </div>
         <button type="submit" className="submit-button">Login</button>

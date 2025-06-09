@@ -56,7 +56,7 @@ const requestLeave = async (
   const totalUsedLeave = leaveBalance.used;
   const maxLeaveDays = leaveBalance.balance + leaveBalance.used;
 
-  if (leaveTypeId != 9 && leaveTypeId != 10) {
+  if (leaveTypeId != 6 && leaveTypeId != 7) {
     if (totalUsedLeave + totalDays > maxLeaveDays) {
       throw new Error(`You have exceeded the maximum allowed leave days for this leave type. Max allowed: ${maxLeaveDays} days.`);
     }
@@ -99,9 +99,9 @@ const requestLeave = async (
   }
 
   let initialStatus;
-  if (leaveTypeId === 9) {
+  if (leaveTypeId === 6) {
     initialStatus = "Approved"
-  } 
+  }
   else {
     initialStatus = finalApprovalLevel > 1 ? LeaveStatus.PENDING_L1 : LeaveStatus.PENDING;
   }
@@ -140,7 +140,7 @@ const cancelLeave = async (leaveRequestId) => {
   await leaveRequestRepository.updateLeaveRequestStatus(leaveRequestId, LeaveStatus.CANCELLED);
 
   if (status === LeaveStatus.APPROVED) {
-    const leaveTypesOnlyUsed = [9, 10];
+    const leaveTypesOnlyUsed = [6, 7];
 
     const startDateObj = startDate instanceof Date ? startDate : new Date(startDate);
     const year = startDateObj.getFullYear();
@@ -194,7 +194,7 @@ const approveLeave = async (requestId) => {
   const year = startDateObj.getFullYear();
 
   // Auto-approve emergency leave (type 9) immediately
-  if (leaveTypeId === 9) {
+  if (leaveTypeId === 6) {
     if (status !== LeaveStatus.APPROVED) {
       await leaveRequestRepository.updateLeaveRequestStatus(requestId, LeaveStatus.APPROVED);
       await leaveBalanceRepository.updateLeaveBalanceByUserAndType(
@@ -211,7 +211,7 @@ const approveLeave = async (requestId) => {
   if (status === LeaveStatus.PENDING) {
     await leaveRequestRepository.updateLeaveRequestStatus(requestId, LeaveStatus.APPROVED);
 
-    if (leaveTypeId === 10) {
+    if (leaveTypeId === 7) {
       await leaveBalanceRepository.updateLeaveBalanceByUserAndType(
         userId,
         leaveTypeId,
@@ -244,7 +244,7 @@ const approveLeave = async (requestId) => {
     else {
       await leaveRequestRepository.updateLeaveRequestStatus(requestId, LeaveStatus.APPROVED);
 
-      if (leaveTypeId === 9 || leaveTypeId === 10) {
+      if (leaveTypeId === 6 || leaveTypeId === 7) {
         await leaveBalanceRepository.updateLeaveBalanceByUserAndType(
           userId,
           leaveTypeId,
@@ -268,7 +268,7 @@ const approveLeave = async (requestId) => {
   else if (status === LeaveStatus.PENDING_L3) {
     await leaveRequestRepository.updateLeaveRequestStatus(requestId, LeaveStatus.APPROVED);
 
-    if (leaveTypeId === 9 || leaveTypeId === 10) {
+    if (leaveTypeId === 6 || leaveTypeId === 7) {
       await leaveBalanceRepository.updateLeaveBalanceByUserAndType(
         userId,
         leaveTypeId,

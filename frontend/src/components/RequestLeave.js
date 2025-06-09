@@ -22,7 +22,7 @@ function LeaveRequest({ onRequestSuccess }) {
   useEffect(() => {
     api.get('/leave/types')
       .then((res) => setLeaveTypes(res.data))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   useEffect(() => {
@@ -41,8 +41,12 @@ function LeaveRequest({ onRequestSuccess }) {
 
       let dayCount = 0;
       let current = new Date(start);
+
       while (current <= end) {
-        dayCount++;
+        const day = current.getDay();
+        const isWeekend = day === 0 || day === 6;
+        const isSandwiched = current > start && current < end && isWeekend;
+        dayCount += isWeekend ? (isSandwiched ? 1 : 0) : 1;
         current.setDate(current.getDate() + 1);
       }
 
@@ -60,7 +64,10 @@ function LeaveRequest({ onRequestSuccess }) {
       return;
     }
 
-    if (new Date(endDate) < new Date(startDate)) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (end < start) {
       alert('End date cannot be before start date.');
       return;
     }
@@ -70,8 +77,22 @@ function LeaveRequest({ onRequestSuccess }) {
       return;
     }
 
-    if (isHalfDay && totalDays !== 1) {
+    if (isHalfDay && totalDays !== 0.5) {
       alert('Half-day leave can only be applied for a single day.');
+      return;
+    }
+
+    const rangeDays = [];
+    const cursor = new Date(start);
+    while (cursor <= end) {
+      rangeDays.push(new Date(cursor));
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    const weekendsOnly = rangeDays.every((d) => d.getDay() === 0 || d.getDay() === 6);
+
+    if (weekendsOnly) {
+      alert('Leave cannot be applied only for Saturday/Sunday.');
       return;
     }
 
@@ -89,7 +110,7 @@ function LeaveRequest({ onRequestSuccess }) {
 
       const requestId = res.data.insertId;
 
-      if (parseInt(leaveTypeId) === 9 && requestId) {
+      if (parseInt(leaveTypeId) === 6 && requestId) {
         await api.put(`/leave/approve/${requestId}`);
       }
 
