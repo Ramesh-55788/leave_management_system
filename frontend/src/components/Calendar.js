@@ -18,15 +18,7 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
     'Loss of Pay': '#FF9800',
   };
 
-  const legendItems = [
-    { type: 'Casual Leave', color: '#4CAF50', marker: false },
-    { type: 'Sick Leave', color: '#060270', marker: false },
-    { type: 'Paid Leave', color: '#2196F3', marker: false },
-    { type: 'Maternity Leave', color: '#9C27B0', marker: false },
-    { type: 'Paternity Leave', color: '#00BCD4', marker: false },
-    { type: 'Emergency Leave', color: '#F44336', marker: false },
-    { type: 'Loss of Pay', color: '#FF9800', marker: false },
-  ];
+  const legendItems = Object.entries(leaveTypeColors).map(([type, color]) => ({ type, color }));
 
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -37,7 +29,7 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
 
   useEffect(() => {
     const loadTeamLeaveData = async () => {
-      if (!teamMembers || teamMembers.length === 0) {
+      if (!teamMembers.length) {
         setLoading(false);
         return;
       }
@@ -45,61 +37,39 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
       setLoading(true);
       try {
         if (fetchTeamLeaveData) {
-          // Calculate previous and next month for cross-month leave handling
           const prevMonth = selectedMonth === 0 ? 12 : selectedMonth;
           const prevYear = selectedMonth === 0 ? selectedYear - 1 : selectedYear;
           const nextMonth = selectedMonth === 11 ? 1 : selectedMonth + 2;
           const nextYear = selectedMonth === 11 ? selectedYear + 1 : selectedYear;
 
-          // Fetch data for previous, current, and next month to handle cross-month leaves
           const [prevMonthData, currentMonthData, nextMonthData] = await Promise.all([
-            fetchTeamLeaveData(
-              teamMembers.map(member => member.id),
-              prevMonth,
-              prevYear
-            ).catch(() => []),
-            fetchTeamLeaveData(
-              teamMembers.map(member => member.id),
-              selectedMonth + 1,
-              selectedYear
-            ).catch(() => []),
-            fetchTeamLeaveData(
-              teamMembers.map(member => member.id),
-              nextMonth,
-              nextYear
-            ).catch(() => [])
+            fetchTeamLeaveData(teamMembers.map(member => member.id), prevMonth, prevYear).catch(() => []),
+            fetchTeamLeaveData(teamMembers.map(member => member.id), selectedMonth + 1, selectedYear).catch(() => []),
+            fetchTeamLeaveData(teamMembers.map(member => member.id), nextMonth, nextYear).catch(() => [])
           ]);
 
-          // Combine all leave data and filter for leaves that intersect with current month
-          const allLeaveData = [
-            ...(prevMonthData || []),
-            ...(currentMonthData || []),
-            ...(nextMonthData || [])
-          ];
+          const allLeaveData = [...prevMonthData, ...currentMonthData, ...nextMonthData];
 
-          // Filter leaves that overlap with the current month being displayed
           const currentMonthStart = new Date(selectedYear, selectedMonth, 1);
           const currentMonthEnd = new Date(selectedYear, selectedMonth + 1, 0);
 
-          const relevantLeaves = allLeaveData.filter(leave => {
-            const leaveStart = new Date(leave.lr_start_date);
-            const leaveEnd = new Date(leave.lr_end_date);
-            
-            // Check if leave overlaps with current month
-            return leaveStart <= currentMonthEnd && leaveEnd >= currentMonthStart;
+          const filteredLeavesMap = new Map();
+
+          allLeaveData.forEach(leave => {
+            if (!leave.is_deleted) {
+              const leaveStart = new Date(leave.lr_start_date);
+              const leaveEnd = new Date(leave.lr_end_date);
+
+              if (leaveStart <= currentMonthEnd && leaveEnd >= currentMonthStart) {
+                const key = `${leave.lr_user_id}_${leave.lr_start_date}_${leave.lr_end_date}_${leave.leaveTypeName}`;
+                if (!filteredLeavesMap.has(key)) {
+                  filteredLeavesMap.set(key, leave);
+                }
+              }
+            }
           });
 
-          // Remove duplicates based on unique identifier (assuming each leave has a unique ID)
-          const uniqueLeaves = relevantLeaves.filter((leave, index, self) => 
-            index === self.findIndex(l => 
-              l.lr_user_id === leave.lr_user_id && 
-              l.lr_start_date === leave.lr_start_date && 
-              l.lr_end_date === leave.lr_end_date &&
-              l.leaveTypeName === leave.leaveTypeName
-            )
-          );
-
-          setTeamLeaveData(uniqueLeaves);
+          setTeamLeaveData(Array.from(filteredLeavesMap.values()));
         } else {
           setTeamLeaveData([]);
         }
@@ -113,10 +83,7 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
 
     loadTeamLeaveData();
 
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, [selectedMonth, selectedYear, teamMembers, fetchTeamLeaveData]);
 
@@ -130,13 +97,9 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
     return `${day} ${hours}:${minutes} ${ampm}`;
   };
 
-  const getDaysInMonth = (month, year) => {
-    return new Date(year, month + 1, 0).getDate();
-  };
+  const getDaysInMonth = (month, year) => new Date(year, month + 1, 0).getDate();
 
-  const getFirstDayOfMonth = (month, year) => {
-    return new Date(year, month, 1).getDay();
-  };
+  const getFirstDayOfMonth = (month, year) => new Date(year, month, 1).getDay();
 
   const renderWeekHeaders = () => {
     const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
@@ -146,13 +109,10 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
     for (let week = 0; week < Math.ceil((daysInMonth + firstDay) / 7); week++) {
       dayNames.forEach(day => {
         headers.push(
-          <th key={`${week}-${day}`} className="day-header">
-            {day}
-          </th>
+          <th key={`${week}-${day}`} className="day-header">{day}</th>
         );
       });
     }
-
     return headers;
   };
 
@@ -162,9 +122,7 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
     const headers = [];
 
     for (let i = 0; i < firstDay; i++) {
-      headers.push(
-        <th key={`empty-${i}`} className="date-header empty-date"></th>
-      );
+      headers.push(<th key={`empty-${i}`} className="date-header empty-date"></th>);
     }
 
     for (let i = 1; i <= daysInMonth; i++) {
@@ -172,9 +130,7 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
       const isWeekend = day.getDay() === 0 || day.getDay() === 6;
 
       headers.push(
-        <th key={i} className={`date-header ${isWeekend ? 'weekend' : ''}`}>
-          {i}
-        </th>
+        <th key={i} className={`date-header ${isWeekend ? 'weekend' : ''}`}>{i}</th>
       );
     }
 
@@ -182,21 +138,17 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
     const remainingCells = totalCells - (daysInMonth + firstDay);
 
     for (let i = 0; i < remainingCells; i++) {
-      headers.push(
-        <th key={`empty-end-${i}`} className="date-header empty-date"></th>
-      );
+      headers.push(<th key={`empty-end-${i}`} className="date-header empty-date"></th>);
     }
 
     return headers;
   };
 
   const renderCalendarBody = () => {
-    if (!teamMembers || teamMembers.length === 0) {
+    if (!teamMembers.length) {
       return (
         <tr>
-          <td colSpan="100%" className="no-members">
-            No team members found
-          </td>
+          <td colSpan="100%" className="no-members">No team members found</td>
         </tr>
       );
     }
@@ -209,25 +161,21 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
       const dayCells = [];
 
       for (let i = 0; i < firstDay; i++) {
-        dayCells.push(
-          <td key={`empty-${i}`} className="calendar-cell empty-cell"></td>
-        );
+        dayCells.push(<td key={`empty-${i}`} className="calendar-cell empty-cell"></td>);
       }
 
       for (let i = 1; i <= daysInMonth; i++) {
         const currentDate = new Date(selectedYear, selectedMonth, i);
         const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
 
-        // Find leave that covers this date
         const leave = memberLeaves.find(leave => {
           const start = new Date(leave.lr_start_date);
           const end = new Date(leave.lr_end_date);
-          
-          // Set time to start of day for accurate comparison
+
           start.setHours(0, 0, 0, 0);
           end.setHours(23, 59, 59, 999);
-          currentDate.setHours(12, 0, 0, 0); 
-          
+          currentDate.setHours(12, 0, 0, 0);
+
           return currentDate >= start && currentDate <= end;
         });
 
@@ -248,18 +196,14 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
       const remainingCells = totalCells - (daysInMonth + firstDay);
 
       for (let i = 0; i < remainingCells; i++) {
-        dayCells.push(
-          <td key={`empty-end-${i}`} className="calendar-cell empty-cell"></td>
-        );
+        dayCells.push(<td key={`empty-end-${i}`} className="calendar-cell empty-cell"></td>);
       }
 
       return (
         <tr key={member.id} className="member-row">
           <td className="member-name">
             <div className="member-info">
-              <div className="member-avatar">
-                {member.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-              </div>
+              <div className="member-avatar">{member.name.split(' ').map(n => n[0]).join('').toUpperCase()}</div>
               <span className="member-name-text">{member.name}</span>
             </div>
           </td>
@@ -287,27 +231,22 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
     }
   };
 
-  const renderLegend = () => {
-    return (
-      <div className="calendar-legend">
-        {legendItems.map((item, index) => (
-          <div className="legend-item" key={index}>
-            <div className={`legend-color ${item.marker ? 'legend-marker' : ''}`} style={{ backgroundColor: item.color }}></div>
-            <span className="legend-text">{item.type}</span>
-          </div>
-        ))}
-      </div>
-    );
-  };
+  const renderLegend = () => (
+    <div className="calendar-legend">
+      {legendItems.map((item, index) => (
+        <div className="legend-item" key={index}>
+          <div className="legend-color" style={{ backgroundColor: item.color }}></div>
+          <span className="legend-text">{item.type}</span>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="team-calendar-container">
       <div className="calendar-header">
         <h2 className="calendar-title">
-          Team calendar
-          <span className="live-time">
-            {formatLiveTime(currentTime)}
-          </span>
+          Team calendar <span className="live-time">{formatLiveTime(currentTime)}</span>
         </h2>
         <div className="month-selector">
           <button onClick={handlePrevMonth} className="nav-button">◀</button>
@@ -344,6 +283,6 @@ const Calendar = ({ teamMembers = [], fetchTeamLeaveData }) => {
       )}
     </div>
   );
-}
+};
 
 export default Calendar;

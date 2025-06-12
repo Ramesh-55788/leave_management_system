@@ -1,6 +1,5 @@
 const { EntitySchema } = require("typeorm");
 
-// Schema for LeaveType entity
 const LeaveType = new EntitySchema({
   name: "LeaveType",
   tableName: "leave_types",
@@ -18,9 +17,14 @@ const LeaveType = new EntitySchema({
       type: Number,
     },
     multiApprover: {
-      name: "multi_approver", 
+      name: "multi_approver",
       type: Number,
       default: 1,
+    },
+    isDeleted: {
+      name: "is_deleted",
+      type: Boolean,
+      default: false,
     },
   },
   relations: {

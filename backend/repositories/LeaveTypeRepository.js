@@ -1,23 +1,30 @@
 const { AppDataSource } = require('../config/db');
 const { LeaveType } = require('../entities/LeaveType');
+const { LeaveRequest } = require('../entities/LeaveRequest');
 
 const leaveTypeRepo = AppDataSource.getRepository(LeaveType);
 
-// Get all leave types
-const getAllLeaveTypes = async () => leaveTypeRepo.find();
+const getAllLeaveTypes = async () => {
+  return leaveTypeRepo.find({
+    where: { isDeleted: false },
+  });
+};
 
-// Get a single leave type by ID
-const getLeaveTypeById = async (id) => leaveTypeRepo.findOne({ where: { id } });
+const getLeaveTypeById = async (id) => {
+  return leaveTypeRepo.findOne({
+    where: { id, isDeleted: false },
+  });
+};
 
-// Create a new leave type
 const createLeaveType = async (name, maxPerYear, multiApprover = 1) => {
   const leaveType = leaveTypeRepo.create({ name, maxPerYear, multiApprover });
   return leaveTypeRepo.save(leaveType);
 };
 
-// Update an existing leave type
 const updateLeaveType = async (id, name, maxPerYear, multiApprover = 1) => {
-  const leaveType = await leaveTypeRepo.findOne({ where: { id } });
+  const leaveType = await leaveTypeRepo.findOne({
+    where: { id, isDeleted: false },
+  });
   if (!leaveType) return null;
   leaveType.name = name;
   leaveType.maxPerYear = maxPerYear;
@@ -25,10 +32,20 @@ const updateLeaveType = async (id, name, maxPerYear, multiApprover = 1) => {
   return leaveTypeRepo.save(leaveType);
 };
 
-// Delete a leave type
 const deleteLeaveType = async (id) => {
-  const result = await leaveTypeRepo.delete(id);
-  return result.affected !== 0;
+  const result = await leaveTypeRepo.update({ id, isDeleted: false }, { isDeleted: true });
+
+  if (result.affected !== 0) {
+    await AppDataSource
+      .createQueryBuilder()
+      .update(LeaveRequest)
+      .set({ isDeleted: true })
+      .where('leaveTypeId = :id', { id })
+      .execute();
+    return true;
+  }
+
+  return false;
 };
 
 module.exports = {

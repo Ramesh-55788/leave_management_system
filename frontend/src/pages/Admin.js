@@ -84,7 +84,7 @@ function Admin({ user, teamMembers, fetchTeamLeaveData }) {
 
       {adminRequests.length > 0 && (
         <section className="admin-requests">
-          <h3>Leave Requests Needing Your Action</h3>
+          <h3>Leave Requests</h3>
           <div className="requests-container">
             {adminRequests.map(req => (
               <div key={req.id} className="request-card">
@@ -92,6 +92,7 @@ function Admin({ user, teamMembers, fetchTeamLeaveData }) {
                   <p><strong>Employee:</strong> {req.employee_name}</p>
                   <p><strong>Leave Type:</strong> {req.leave_type}</p>
                   <p><strong>Period:</strong> {formatDate(req.start_date)} - {formatDate(req.end_date)}</p>
+                  <p><strong>Reason:</strong> {req.reason}</p>
                   <p><strong>Status:</strong> <span className={`status-tag ${req.status.toLowerCase().replace(/ /g, '-')}`}>{req.status}</span></p>
                 </div>
                 <div className="request-actions">

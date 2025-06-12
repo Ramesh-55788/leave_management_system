@@ -3,23 +3,31 @@ const { LeaveBalance } = require('../entities/LeaveBalance');
 
 const leaveBalanceRepo = AppDataSource.getRepository(LeaveBalance);
 
-// Get all leave balances for a user in a specific year
 const getLeaveBalanceByUserAndYear = async (userId, year) => {
-  return leaveBalanceRepo.find({ where: { userId, year }, relations: ['leaveType'] });
+  const leaveBalances = await leaveBalanceRepo
+    .createQueryBuilder('lb')
+    .leftJoinAndSelect('lb.leaveType', 'lt')
+    .where('lb.userId = :userId', { userId })
+    .andWhere('lb.year = :year', { year })
+    .andWhere('lb.isDeleted = false')
+    .andWhere('lt.isDeleted = false')
+    .getMany();
+
+  return leaveBalances;
 };
 
-// Update the balance and used fields of a leave balance record
 const updateLeaveBalance = async (id, balance, used) => {
-  const leaveBalance = await leaveBalanceRepo.findOne({ where: { id } });
+  const leaveBalance = await leaveBalanceRepo.findOne({ where: { id, isDeleted: false } });
   if (!leaveBalance) return null;
   leaveBalance.balance = Number(balance);
   leaveBalance.used = Number(used);
   return leaveBalanceRepo.save(leaveBalance);
 };
 
-// Update the balance and used fields of a leave balance record based on user ID, leave type ID, and year
 const updateLeaveBalanceByUserAndType = async (userId, leaveTypeId, year, balanceChange, usedChange) => {
-  const leaveBalance = await leaveBalanceRepo.findOne({ where: { userId, leaveTypeId, year } });
+  const leaveBalance = await leaveBalanceRepo.findOne({
+    where: { userId, leaveTypeId, year, isDeleted: false },
+  });
 
   if (!leaveBalance) return null;
 
@@ -29,15 +37,38 @@ const updateLeaveBalanceByUserAndType = async (userId, leaveTypeId, year, balanc
   return leaveBalanceRepo.save(leaveBalance);
 };
 
-// Create a new leave balance record with specified values
 const createLeaveBalance = async (userId, leaveTypeId, year, balance, used = 0) => {
-  const leaveBalance = leaveBalanceRepo.create({ userId, leaveTypeId, year, balance, used });
+  const leaveBalance = leaveBalanceRepo.create({
+    userId,
+    leaveTypeId,
+    year,
+    balance,
+    used,
+  });
   return leaveBalanceRepo.save(leaveBalance);
+};
+
+const createOrInitLeaveBalance = async (userId, leaveTypeId, year, balance = 0) => {
+  const existing = await leaveBalanceRepo.findOne({
+    where: { userId, leaveTypeId, year, isDeleted: false }
+  });
+
+  if (!existing) {
+    const leaveBalance = leaveBalanceRepo.create({
+      userId,
+      leaveTypeId,
+      year,
+      balance,
+      used: 0
+    });
+    await leaveBalanceRepo.save(leaveBalance);
+  }
 };
 
 module.exports = {
   getLeaveBalanceByUserAndYear,
   updateLeaveBalance,
   updateLeaveBalanceByUserAndType,
-  createLeaveBalance
+  createLeaveBalance,
+  createOrInitLeaveBalance
 };

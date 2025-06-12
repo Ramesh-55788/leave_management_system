@@ -106,6 +106,12 @@ function AddUser() {
           value={formData.password}
           onChange={handleChange}
         />
+        <select name="role" value={formData.role} onChange={handleChange}>
+          <option value="">Select Role</option>
+          <option value="employee">Employee</option>
+          <option value="manager">Manager</option>
+          <option value="hr">HR</option>
+        </select>
         <input
           type="number"
           name="reportingManagerId"
@@ -113,12 +119,6 @@ function AddUser() {
           value={formData.reportingManagerId}
           onChange={handleChange}
         />
-        <select name="role" value={formData.role} onChange={handleChange}>
-          <option value="">Select Role</option>
-          <option value="employee">Employee</option>
-          <option value="manager">Manager</option>
-          <option value="hr">HR</option>
-        </select>
         <button type="submit">Create User</button>
       </form>
 

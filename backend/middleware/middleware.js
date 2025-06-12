@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 
-// Middleware for authentication
 const authMiddleware = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1];
 
@@ -17,7 +16,6 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-// Middleware for authorization based on user roles
 const roleMiddleware = (requiredRole) => (req, res, next) => {
   const { role } = req.user;
 

@@ -7,7 +7,6 @@ const UserRole = {
   EMPLOYEE: 'employee',
 };
 
-//Schema for User entity
 const User = new EntitySchema({
   name: "User",
   tableName: "users",
@@ -15,7 +14,7 @@ const User = new EntitySchema({
     id: {
       type: Number,
       primary: true,
-      generated: true, 
+      generated: true,
     },
     name: {
       type: String,
@@ -29,17 +28,22 @@ const User = new EntitySchema({
     },
     role: {
       type: "enum",
-      enum: UserRole, 
+      enum: UserRole,
       default: UserRole.EMPLOYEE,
     },
     managerId: {
       name: "manager_id",
       type: Number,
-      nullable: true, 
+      nullable: true,
     },
     created_at: {
       type: "timestamp",
-      default: () => "CURRENT_TIMESTAMP", 
+      default: () => "CURRENT_TIMESTAMP",
+    },
+    isDeleted: {
+      name: "is_deleted",
+      type: Boolean,
+      default: false,
     },
   },
   relations: {

@@ -1,12 +1,12 @@
 const jwt = require('jsonwebtoken');
-const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
 const parseExcelToJson = require('../utils/excelParser');
 const Queue = require('bull');
 const { getAllUsers, createUser, getUserByEmail } = require('../models/userModel.js');
 
-dotenv.config();
 const SECRET_KEY = process.env.JWT_SECRET || 'default_secret_key';
+
+const userQueue = new Queue('userQueue', { redis: { port: 6380, host: '127.0.0.1' } });
 
 const register = async (req, res) => {
   try {
@@ -18,7 +18,7 @@ const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     await createUser(name, email, hashedPassword, role, reportingManagerId);
     res.status(201).json({ message: 'User Added successfully' });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -39,9 +39,9 @@ const login = async (req, res) => {
       email: user.email,
       role: user.role,
     };
-    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '1hr' });
+    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' });
     res.status(200).json({ message: 'Login successful', user, token });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -53,12 +53,10 @@ const fetchAllUsers = async (req, res) => {
       return res.status(404).json({ message: 'No users found.' });
     }
     res.json({ count: users.length, users });
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Failed to fetch users' });
   }
 };
-
-const userQueue = new Queue('userQueue', { redis: { port: 6379, host: '127.0.0.1' } });
 
 const chunkArray = (array, chunkSize) => {
   const chunks = [];
@@ -77,7 +75,6 @@ const uploadBulkUsers = async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
     const rawUsers = parseExcelToJson(file.buffer);
-
     const users = await Promise.all(
       rawUsers.map(async (user) => {
         const hashedPassword = await bcrypt.hash(user.password, 10);
@@ -87,14 +84,12 @@ const uploadBulkUsers = async (req, res) => {
         };
       })
     );
-
     const userChunks = chunkArray(users, CHUNK_SIZE);
     for (const chunk of userChunks) {
       await userQueue.add({ users: chunk });
     }
-
     res.status(200).json({ message: 'Users Added' });
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Failed to process Excel file' });
   }
 };

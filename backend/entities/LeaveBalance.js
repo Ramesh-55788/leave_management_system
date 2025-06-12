@@ -1,6 +1,5 @@
 const { EntitySchema } = require("typeorm");
 
-// Schema for the LeaveBalance entity
 const LeaveBalance = new EntitySchema({
   name: "LeaveBalance",
   tableName: "leave_balances",
@@ -22,10 +21,15 @@ const LeaveBalance = new EntitySchema({
       type: Number,
     },
     balance: {
-      type: "float", 
+      type: "float",
     },
     used: {
       type: "float",
+    },
+    isDeleted: {
+      name: "is_deleted",
+      type: Boolean,
+      default: false,
     },
   },
   relations: {

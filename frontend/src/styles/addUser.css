@@ -356,19 +356,6 @@
   }
 }
 
-.add-user-form {
-  animation: fadeIn 0.6s ease-out;
-}
-
-.add-user-form form {
-  animation: slideInUp 0.6s ease-out;
-}
-
-.add-user-form form:nth-of-type(2) {
-  animation-delay: 0.2s;
-  animation-fill-mode: both;
-}
-
 /* Accessibility Enhancements */
 .add-user-form input:focus,
 .add-user-form select:focus,
@@ -386,33 +373,5 @@
   
   .add-user-form button {
     border: 2px solid #2c3e50;
-  }
-}
-
-/* Reduced Motion Support */
-@media (prefers-reduced-motion: reduce) {
-  .add-user-form *,
-  .add-user-form *::before,
-  .add-user-form *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* Print Styles */
-@media print {
-  .add-user-form {
-    background: white;
-    box-shadow: none;
-  }
-  
-  .add-user-form form {
-    box-shadow: none;
-    border: 1px solid #ddd;
-  }
-  
-  .add-user-form button {
-    display: none;
   }
 }

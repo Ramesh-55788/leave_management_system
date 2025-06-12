@@ -22,7 +22,8 @@ async function seedLeaveTypes() {
         }
  
         console.log('Leave Types data seeded successfully!');
-    } else {
+    } 
+    else {
         console.log('Data already exist. Skipping Leave Types seeding...');
     }
 }

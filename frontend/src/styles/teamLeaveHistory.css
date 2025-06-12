@@ -5,7 +5,6 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
     position: relative;
     overflow: hidden;
-    animation: slideInUp 0.6s ease-out;
   }
   
   .team-leave-history h2 {
@@ -52,14 +51,8 @@
     letter-spacing: 0.5px;
   }
   
-  .team-leave-history tbody tr {
-    border-bottom: 1px solid #eee;
-    transition: background 0.3s ease, transform 0.2s ease;
-  }
-  
   .team-leave-history tbody tr:hover {
     background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
-    transform: scale(1.01);
   }
   
   .team-leave-history td {

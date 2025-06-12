@@ -58,9 +58,8 @@ function TeamLeaveHistory() {
   
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
   
-    return `${day}-${month}-${year} ,${hours}:${minutes}:${seconds}`;
+    return `${day}-${month}-${year} ,${hours}:${minutes}`;
   };
 
   return (
@@ -78,7 +77,7 @@ function TeamLeaveHistory() {
                   <th>From</th>
                   <th>To</th>
                   <th>Reason</th>
-                  <th>TotalDays</th>
+                  <th>Total Days</th>
                   <th>Status</th>
                   <th>Requested On</th>
                   <th>Updated At</th>

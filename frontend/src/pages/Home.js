@@ -115,7 +115,6 @@ function Home() {
       <div className="home-header">
         <h2>Welcome <span>{user.name}</span>!</h2>
       </div>
-
       {user.role !== "employee" && (
         <div className="incoming-requests">
           <h3>Leave Requests for Approval</h3>
@@ -129,6 +128,7 @@ function Home() {
                   <th>Leave Type</th>
                   <th>From</th>
                   <th>To</th>
+                  <th>Reason</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -141,6 +141,7 @@ function Home() {
                       <td>{req.leave_type}</td>
                       <td>{formatDate(req.start_date)}</td>
                       <td>{formatDate(req.end_date)}</td>
+                      <td>{req.reason}</td>
                       <td>{req.status}</td>
                       <td>
                         {['Pending', 'Pending (L1)', 'Pending (L2)'].includes(req.status) ? (
@@ -154,7 +155,7 @@ function Home() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" style={{ textAlign: 'center' }}>No leave requests</td>
+                    <td colSpan="7" style={{ textAlign: 'center' }}>No leave requests</td>
                   </tr>
                 )}
               </tbody>

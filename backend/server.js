@@ -1,7 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const cron = require('node-cron');
 
 const runCarryForwardJob = require('./cron/carryForwardJob');
 const seedUsers = require('./seeds/userSeeder');
