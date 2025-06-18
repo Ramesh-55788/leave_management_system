@@ -2,7 +2,14 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const parseExcelToJson = require('../utils/excelParser');
 const Queue = require('bull');
-const { getAllUsers, createUser, getUserByEmail } = require('../models/userModel.js');
+const {
+  getAllUsers,
+  createUser,
+  getUserByEmail,
+  getUserById,
+  softDeleteUser,
+  updateManagerForUser
+} = require('../repositories/UserRepository');
 
 const SECRET_KEY = process.env.JWT_SECRET || 'default_secret_key';
 
@@ -58,6 +65,28 @@ const fetchAllUsers = async (req, res) => {
   }
 };
 
+const deleteUserController = async (req, res) => {
+  try {
+    const deleted = await softDeleteUser(req.params.id);
+    if (!deleted) return res.status(404).json({ message: 'User not found' });
+    res.json({ message: 'User deleted successfully' });
+  } catch {
+    res.status(500).json({ error: 'Failed to delete user' });
+  }
+};
+
+const updateUserManager = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { newManagerId } = req.body;
+    const updated = await updateManagerForUser(userId, newManagerId);
+    if (!updated) return res.status(404).json({ error: 'User not found' });
+    res.json({ message: 'Manager reassigned successfully' });
+  } catch {
+    res.status(500).json({ error: 'Failed to update manager' });
+  }
+};
+
 const chunkArray = (array, chunkSize) => {
   const chunks = [];
   for (let i = 0; i < array.length; i += chunkSize) {
@@ -98,5 +127,7 @@ module.exports = {
   register,
   login,
   fetchAllUsers,
+  updateUserManager,
+  deleteUserController,
   uploadBulkUsers
 };

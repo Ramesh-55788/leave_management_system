@@ -1,7 +1,6 @@
 .leave-policy-container {
   margin: 0 auto;
   padding: 2rem 6rem;
-  min-height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -34,6 +33,7 @@
 }
 .leave-select-wrapper label{
   font-size: large;
+  font-weight: 500;
 }
 
 .leave-select {
@@ -94,7 +94,7 @@
 }
 
 .leave-label {
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #495057;
   text-transform: uppercase;

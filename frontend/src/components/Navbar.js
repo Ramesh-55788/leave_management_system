@@ -25,8 +25,9 @@ function Navbar() {
   }
 
   if (user.role === 'admin') {
-    links.push({ to: '/add-user', label: 'Add User' });
     links.push({ to: '/leave-policy', label: 'Leave Policy' });
+    links.push({ to: '/users', label: 'Users' });
+    links.push({ to: '/add-user', label: 'Add User' });
   }
 
   const handleLogout = () => {

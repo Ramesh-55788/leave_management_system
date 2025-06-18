@@ -37,6 +37,21 @@ const createUser = async (name, email, password, role, managerId = null) => {
   return savedUser;
 };
 
+const softDeleteUser = async (id) => {
+  const user = await userRepo.findOne({ where: { id, isDeleted: false } });
+  if (!user) return false;
+  user.isDeleted = true;
+  await userRepo.save(user);
+  return true;
+};
+
+const updateManagerForUser = async (userId, newManagerId) => {
+  const user = await userRepo.findOne({ where: { id: userId, isDeleted: false } });
+  if (!user) return null;
+  user.managerId = newManagerId;
+  return await userRepo.save(user);
+};
+
 const getUserByEmail = async (email) => {
   return userRepo.findOne({
     where: { email, isDeleted: false },
@@ -52,6 +67,8 @@ const getUserById = async (id) => {
 module.exports = {
   getAllUsers,
   createUser,
+  softDeleteUser,
+  updateManagerForUser,
   getUserByEmail,
   getUserById,
 };

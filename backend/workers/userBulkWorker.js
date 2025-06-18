@@ -1,7 +1,7 @@
 require('dotenv').config();
 const Queue = require('bull');
 const { AppDataSource } = require('../config/db');
-const { createUser } = require('../models/userModel');
+const { createUser } = require('../controllers/authController');
 
 const userQueue = new Queue('userQueue', {
   redis: { port: 6380, host: '127.0.0.1' }

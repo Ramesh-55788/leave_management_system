@@ -57,14 +57,10 @@
   
   .team-leave-history td {
     padding: 1rem;
-    color: #2f3640;
+    color: #616c7b;
+    font-weight: 600;
     font-size: 0.95rem;
     vertical-align: middle;
-  }
-  
-  .team-leave-history td:first-child {
-    font-weight: 600;
-    color: #2c3e50;
   }
   
   .no-members, .no-history {

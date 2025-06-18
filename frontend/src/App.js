@@ -11,6 +11,7 @@ import LeaveBalance from './components/LeaveBalance';
 import LeavePolicy from './components/LeavePolicy';
 import LeaveHistory from './components/LeaveHistory';
 import TeamLeaveHistory from './components/TeamLeaveHistory';
+import Users from './components/Users'
 
 function App() {
   useEffect(() => {
@@ -33,6 +34,7 @@ function App() {
           <Route path="/leave-history" element={<LeaveHistory/>} />
           <Route path="/team-leave-history" element={<TeamLeaveHistory />} />
           <Route path="/add-user" element={<AddUser />} />
+          <Route path="/users" element={<Users />} />
         </Routes>
       </Router>
     </UserProvider>
