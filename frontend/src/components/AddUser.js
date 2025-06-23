@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import '../styles/addUser.css';
+import { notifySuccess, notifyError, notifyWarn} from '../utils/toast';
 
 function AddUser() {
   const [formData, setFormData] = useState({
@@ -26,7 +27,7 @@ function AddUser() {
 
     if (!name || !email || !password || !role || !reportingManagerId) {
       setMessage('');
-      setError('Please fill in all fields.');
+      notifyWarn('Please fill in all fields.');
       return;
     }
 
@@ -34,7 +35,7 @@ function AddUser() {
       const { status } = await api.post('/auth/register', formData);
 
       if (status === 201) {
-        setMessage('User created successfully!');
+        notifySuccess('User created successfully!');
         setError('');
         setTimeout(() => {
           navigate('/');
@@ -42,7 +43,7 @@ function AddUser() {
       }
     } catch (err) {
       setMessage('');
-      setError(err.response?.status === 400 ? 'User with this email already exists.' : 'Failed to create user due to server error.');
+      notifyError(err.response?.status === 400 ? 'User with this email already exists.' : 'Failed to create user due to server error.');
     }
   };
 
@@ -55,7 +56,7 @@ function AddUser() {
   const handleUpload = async (e) => {
     e.preventDefault();
     if (!file) {
-      setError('Please select a file.');
+      notifyError('Please select a file.');
       return;
     }
 
@@ -66,17 +67,18 @@ function AddUser() {
       const res = await api.post('/auth/upload-users', formData);
 
       if (res.status >= 200 && res.status < 300) {
-        setMessage(res.data.message);
+        notifySuccess(res.data.message);
         setError('');
         setTimeout(() => {
           navigate('/');
         }, 1000);
-      } else {
-        setError(res.data.message);
+      }
+      else {
+        notifyError(res.data.message);
         setMessage('');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to upload file.');
+      notifyError(err.response?.data?.message || 'Failed to upload file.');
       setMessage('');
     }
   };

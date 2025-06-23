@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import '../styles/leavepolicy.css';
+import { notifySuccess, notifyError, notifyWarn} from '../utils/toast';
 
 function LeavePolicy() {
   const [leaveTypes, setLeaveTypes] = useState([]);
@@ -36,15 +37,15 @@ function LeavePolicy() {
 
   const handleUpdate = async () => {
     if (selectedLeave.name.trim() === '' || selectedLeave.maxPerYear <= 0) {
-      alert('All fields are required and Max Days Per Year must be greater than 0.');
+      notifyWarn('All fields are required and Max Days Per Year must be greater than 0.');
       return;
     }
     try {
       await api.put(`/leave/types/${selectedLeave.id}`, selectedLeave);
-      alert('Leave policy updated');
+      notifySuccess('Leave policy updated');
       fetchLeaveTypes();
     } catch {
-      alert('Failed to update leave policy');
+      notifyError('Failed to update leave policy');
     }
   };
 
@@ -55,13 +56,13 @@ function LeavePolicy() {
       setSelectedLeave(null);
       fetchLeaveTypes();
     } catch {
-      alert('Failed to delete leave type');
+      notifyError('Failed to delete leave type');
     }
   };
 
   const handleAdd = async () => {
     if (newLeave.name.trim() === '' || newLeave.maxPerYear <= 0) {
-      alert('All fields are required and Max Days Per Year must be greater than 0.');
+      notifyWarn('All fields are required and Max Days Per Year must be greater than 0.');
       return;
     }
     try {
@@ -69,7 +70,7 @@ function LeavePolicy() {
       setNewLeave({ name: '', maxPerYear: 0, multiApprover: 1 });
       fetchLeaveTypes();
     } catch {
-      alert('Failed to add leave type');
+      notifyError('Failed to add leave type');
     }
   };
 

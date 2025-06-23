@@ -5,6 +5,7 @@ import { useUser } from '../userContext';
 import Admin from './Admin';
 import Calendar from '../components/Calendar';
 import '../styles/home.css';
+import { notifySuccess, notifyError } from '../utils/toast';
 
 function Home() {
   const { user, logout } = useUser();
@@ -38,8 +39,8 @@ function Home() {
       let teamMembers;
       if (user.role !== 'admin') {
         teamMembers = res.data.users.filter(
-          u => u.managerId === currentManagerId || 
-               (u.managerId === UsersManagerId)
+          u => u.managerId === currentManagerId ||
+            (u.managerId === UsersManagerId)
         );
       } else {
         teamMembers = res.data.users;
@@ -77,7 +78,7 @@ function Home() {
   const handleApproveReject = async (requestId, action) => {
     try {
       await api.put(`/leave/${action}/${requestId}`);
-      alert(`Request ${action}ed successfully`);
+      notifySuccess(`Request ${action} successfully`);
       setIncomingRequests(prev =>
         prev.map(req =>
           req.id === requestId
@@ -86,7 +87,7 @@ function Home() {
         )
       );
     } catch {
-      alert(`Failed to ${action} request`);
+      notifyError(`Failed to ${action} request`);
     }
   };
 

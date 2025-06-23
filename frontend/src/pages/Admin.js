@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import api from '../utils/api';
 import Calendar from '../components/Calendar';
 import '../styles/admin.css';
+import { notifySuccess, notifyError } from '../utils/toast';
 
 function Admin({ user, teamMembers, fetchTeamLeaveData }) {
 
@@ -49,9 +50,9 @@ function Admin({ user, teamMembers, fetchTeamLeaveData }) {
       setAdminRequests(prevRequests =>
         prevRequests.map(req => req.id === requestId ? { ...req, status: action } : req)
       );
-      alert(`Request ${action}ed successfully`);
+      notifySuccess(`Request ${action}ed successfully`);
     } catch (err) {
-      alert(`Failed to ${action} request`);
+      notifyError(`Failed to ${action} request`);
     }
   };
 

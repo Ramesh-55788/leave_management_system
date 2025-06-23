@@ -103,7 +103,7 @@ const rejectLeaveHandler = asyncHandler(async (req, res) => {
   res.json({ message: 'Leave rejected', result });
 });
 
-// Create, Update, Delete leave type (merged patterns)
+// Create, Update, Delete leave type 
 const createLeaveHandler = asyncHandler(async (req, res) => {
   const { name, maxPerYear, multiApprover } = req.body;
   const result = await leaveModel.addLeaveType(name, maxPerYear, multiApprover);

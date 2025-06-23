@@ -3,6 +3,7 @@ import api from '../utils/api';
 import { useUser } from '../userContext';
 import { useNavigate } from 'react-router-dom';
 import '../styles/requestleave.css';
+import { notifySuccess, notifyError, notifyWarn} from '../utils/toast';
 
 function LeaveRequest({ onRequestSuccess }) {
   const { user } = useUser();
@@ -60,7 +61,7 @@ function LeaveRequest({ onRequestSuccess }) {
     e.preventDefault();
 
     if (!leaveTypeId || !startDate || !endDate || !reason || (isHalfDay && !halfDayType)) {
-      alert('Please fill all required fields.');
+      notifyWarn('Please fill all required fields.');
       return;
     }
 
@@ -68,17 +69,17 @@ function LeaveRequest({ onRequestSuccess }) {
     const end = new Date(endDate);
 
     if (end < start) {
-      alert('End date cannot be before start date.');
+      notifyWarn('End date cannot be before start date.');
       return;
     }
 
     if (!isHalfDay && totalDays === 0) {
-      alert('Selected date range includes no working days.');
+      notifyWarn('Selected date range includes no working days.');
       return;
     }
 
     if (isHalfDay && totalDays !== 0.5) {
-      alert('Half-day leave can only be applied for a single day.');
+      notifyWarn('Half-day leave can only be applied for a single day.');
       return;
     }
 
@@ -92,7 +93,7 @@ function LeaveRequest({ onRequestSuccess }) {
     const weekendsOnly = rangeDays.every((d) => d.getDay() === 0 || d.getDay() === 6);
 
     if (weekendsOnly) {
-      alert('Leave cannot be applied only for Saturday/Sunday.');
+      notifyWarn('Leave cannot be applied for Saturday/Sunday.');
       return;
     }
 
@@ -114,7 +115,7 @@ function LeaveRequest({ onRequestSuccess }) {
         await api.put(`/leave/approve/${requestId}`);
       }
 
-      alert('Leave requested successfully');
+      notifySuccess('Leave requested successfully');
       onRequestSuccess?.();
 
       setLeaveTypeId('');
@@ -131,7 +132,7 @@ function LeaveRequest({ onRequestSuccess }) {
         alert(err.response.data.error);
         return;
       } else {
-        alert('Error submitting leave request');
+        notifyError('Error submitting leave request');
         return;
       }
     }

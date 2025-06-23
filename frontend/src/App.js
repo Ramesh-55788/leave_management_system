@@ -12,6 +12,8 @@ import LeavePolicy from './components/LeavePolicy';
 import LeaveHistory from './components/LeaveHistory';
 import TeamLeaveHistory from './components/TeamLeaveHistory';
 import Users from './components/Users'
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   useEffect(() => {
@@ -25,13 +27,22 @@ function App() {
     <UserProvider>
       <Router>
         <Navbar />
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          pauseOnHover
+          theme="colored"
+        />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/request-leave" element={<RequestLeave />} />
           <Route path="/leave-balance" element={<LeaveBalance />} />
           <Route path="/leave-policy" element={<LeavePolicy />} />
-          <Route path="/leave-history" element={<LeaveHistory/>} />
+          <Route path="/leave-history" element={<LeaveHistory />} />
           <Route path="/team-leave-history" element={<TeamLeaveHistory />} />
           <Route path="/add-user" element={<AddUser />} />
           <Route path="/users" element={<Users />} />

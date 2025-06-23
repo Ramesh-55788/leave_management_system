@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
 import '../styles/users.css';
+import { notifySuccess, notifyWarn } from '../utils/toast';
 
 function Users() {
   const [users, setUsers] = useState([]);
@@ -27,10 +28,17 @@ function Users() {
       return;
     }
     await api.delete(`/auth/users/${id}`);
+    notifySuccess('User deleted successfully.');
     fetchUsers();
   };
 
   const confirmReassignment = async () => {
+    const allAssigned = reportees.every(emp => reassigned[emp.id]);
+    if (!allAssigned) {
+      notifyWarn('Please assign a new manager for all reportees before proceeding.');
+      return;
+    }
+
     const updates = reportees.map((emp) => {
       return api.put(`/auth/users/${emp.id}/manager`, {
         newManagerId: reassigned[emp.id],
@@ -38,6 +46,7 @@ function Users() {
     });
     await Promise.all(updates);
     await api.delete(`/auth/users/${deletingManagerId}`);
+    notifySuccess('Manager reassigned and user deleted successfully.');
     setReassigning(false);
     setDeletingManagerId(null);
     setReportees([]);

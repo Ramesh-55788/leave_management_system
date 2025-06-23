@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
 import { useUser } from '../userContext';
 import '../styles/leavebalance.css';
+import {notifyError} from '../utils/toast';
 
 function LeaveBalance() {
   const { user } = useUser();
@@ -17,7 +18,7 @@ function LeaveBalance() {
         setLoading(false);
       })
       .catch(() => {
-        setError('Failed to load leave balance');
+        notifyError('Failed to load leave balance');
         setLoading(false);
       });
   }, [user]);

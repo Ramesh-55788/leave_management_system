@@ -3,6 +3,7 @@ import api from '../utils/api';
 import { useUser } from '../userContext';
 import { useNavigate } from 'react-router-dom';
 import '../styles/leavehistory.css';
+import { notifySuccess, notifyError} from '../utils/toast';
 
 function LeaveHistory() {
   const [leaveHistory, setLeaveHistory] = useState([]);
@@ -28,6 +29,7 @@ function LeaveHistory() {
         setLeaveHistory(res.data.leaveHistory || []);
       } catch (err) {
         console.error('Failed to fetch leave history:', err);
+        notifyError('Failed to fetch leave history');
       } finally {
         setLoading(false);
       }
@@ -43,6 +45,7 @@ function LeaveHistory() {
       setLeaveHistory(res.data.leaveHistory || []);
     } catch (err) {
       console.error('Failed to fetch leave history:', err);
+      notifyError('Unable to fetch leave history. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -53,12 +56,12 @@ function LeaveHistory() {
 
     try {
       await api.put(`/leave/cancel/${leaveId}`);
-      alert('Leave cancelled');
+      notifySuccess('Leave cancelled');
       closeModal();
       fetchLeaveHistory();
     } catch (err) {
       console.error('Failed to cancel leave:', err);
-      alert('Failed to cancel leave');
+      notifyError('Failed to cancel leave');
     }
   };
 

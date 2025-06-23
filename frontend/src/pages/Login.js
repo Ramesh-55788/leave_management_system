@@ -4,6 +4,7 @@ import { useUser } from '../userContext';
 import api from '../utils/api';
 import axios from 'axios';
 import '../styles/login.css';
+import { notifyError} from '../utils/toast';
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -24,9 +25,9 @@ function Login() {
     catch (error) {
       console.error('Login error:', error.response?.data);
       if (error.response) {
-        setError(error.response.data.error || 'Login failed. Please try again.');
+        notifyError(error.response.data.error || 'Login failed. Please try again.');
       } else {
-        setError('Server error. Please try again.');
+        notifyError('Server error. Please try again.');
       }
     }
   };
