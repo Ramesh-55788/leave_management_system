@@ -1,15 +1,16 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import api from '../utils/api';
 import Calendar from '../components/Calendar';
+import LeaveSection from '../components/LeaveSection';
 import '../styles/admin.css';
 import { notifySuccess, notifyError } from '../utils/toast';
 
 function Admin({ user, teamMembers, fetchTeamLeaveData }) {
-
   const [adminRequests, setAdminRequests] = useState([]);
   const [usersOnLeaveToday, setUsersOnLeaveToday] = useState([]);
   const [totalUsers, setTotalUsers] = useState(0);
   const [leaveUsers, setLeaveUsers] = useState(0);
+  const [isLoadingLeaveData, setIsLoadingLeaveData] = useState(true);
 
   const fetchAdminRequests = useCallback(async () => {
     const res = await api.get(`/leave/requests/${user.id}`);
@@ -21,19 +22,32 @@ function Admin({ user, teamMembers, fetchTeamLeaveData }) {
   }, [user]);
 
   const fetchUsersOnLeaveToday = async () => {
-    const res = await api.get('/leave/on-leave-today');
-    if (!res.data) {
+    setIsLoadingLeaveData(true);
+    try {
+      const res = await api.get('/leave/on-leave-today');
+      if (!res.data) {
+        setUsersOnLeaveToday([]);
+        setLeaveUsers(0);
+      } else {
+        setUsersOnLeaveToday(res.data.users);
+        setLeaveUsers(res.data.count);
+      }
+    } catch (error) {
+      console.error('Error fetching leave data:', error);
       setUsersOnLeaveToday([]);
       setLeaveUsers(0);
-    } else {
-      setUsersOnLeaveToday(res.data.users);
-      setLeaveUsers(res.data.count);
+    } finally {
+      setIsLoadingLeaveData(false);
     }
   };
 
   const fetchAllUsers = async () => {
-    const res = await api.get('/auth/users');
-    setTotalUsers(res.data.count);
+    try {
+      const res = await api.get('/auth/users');
+      setTotalUsers(res.data.count);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
   };
 
   useEffect(() => {
@@ -66,22 +80,13 @@ function Admin({ user, teamMembers, fetchTeamLeaveData }) {
       <header className="home-header">
         <h2>Welcome,<span> Admin</span></h2>
       </header>
-
-      <section className="summary-section">
-        <div className="users-on-leave-card">
-          <h3>Employee's on Leave Today</h3>
-          {usersOnLeaveToday.length === 0 ? (
-            <p>No one is on leave today</p>
-          ) : (
-            <ul>
-              {usersOnLeaveToday.map(user => (
-                <li key={user.id}>{user.name}</li>
-              ))}
-            </ul>
-          )}
-          <p className="leave-count">{leaveUsers} out of {totalUsers} employee on leave</p>
-        </div>
-      </section>
+      
+      <LeaveSection
+        usersOnLeaveToday={usersOnLeaveToday}
+        totalUsers={totalUsers}
+        leaveUsers={leaveUsers}
+        loading={isLoadingLeaveData}
+      />
 
       {adminRequests.length > 0 && (
         <section className="admin-requests">
@@ -112,14 +117,12 @@ function Admin({ user, teamMembers, fetchTeamLeaveData }) {
         </section>
       )}
 
-      {(
-        <div className='team-calendar'>
-          <Calendar
-            teamMembers={teamMembers}
-            fetchTeamLeaveData={fetchTeamLeaveData}
-          />
-        </div>
-      )}
+      <div className='team-calendar'>
+        <Calendar
+          teamMembers={teamMembers}
+          fetchTeamLeaveData={fetchTeamLeaveData}
+        />
+      </div>
     </div>
   );
 }
