@@ -20,7 +20,6 @@ async function seedLeaveTypes() {
             const leaveTypes = leaveTypeRepo.create(leave);
             await leaveTypeRepo.save(leaveTypes);
         }
- 
         console.log('Leave Types data seeded successfully!');
     } 
     else {

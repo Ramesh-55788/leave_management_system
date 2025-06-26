@@ -43,7 +43,7 @@ function AddUser() {
       }
     } catch (err) {
       setMessage('');
-      notifyError(err.response?.status === 400 ? 'User with this email already exists.' : 'Failed to create user due to server error.');
+      notifyError(err.response?.status === 400 ? 'User with this email already exists.' : 'Failed to create user.');
     }
   };
 

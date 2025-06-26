@@ -65,14 +65,12 @@
 }
 
 .admin-requests h3 {
-  color: #f8fafc;
+  color: black;
   font-size: 2.25rem;
   font-weight: 700;
   margin-bottom: 2.5rem;
   text-align: center;
-  background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
   position: relative;
 }

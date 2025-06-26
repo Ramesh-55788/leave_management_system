@@ -11,7 +11,7 @@ function Navbar() {
   if (!user || location.pathname === '/login') return null;
 
   const links = [
-    { to: '/', label: 'Home' },
+    { to: '/home', label: 'Home' },
   ];
 
   if (user.role === 'employee' || user.role === 'manager' || user.role === 'hr') {

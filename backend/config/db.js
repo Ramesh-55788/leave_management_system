@@ -17,7 +17,7 @@ const AppDataSource = new DataSource({
   synchronize: true,
   logging: false,
   entities: [User, LeaveType, LeaveBalance, LeaveRequest],
-  migrations: ['src/migrations/**/*.ts'],
+  migrations: ['backend/migrations/**/*.ts'],
 });
 
 const initializeDatabase = async () => {

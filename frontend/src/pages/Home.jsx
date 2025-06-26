@@ -135,7 +135,7 @@ function Home() {
                 </tr>
               </thead>
               <tbody>
-                {incomingRequests.length > 0 ? (
+                {incomingRequests.length >= 0 ? (
                   incomingRequests.map(req => (
                     <tr key={req.id}>
                       <td>{req.employee_name}</td>

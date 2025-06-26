@@ -11,7 +11,7 @@ const {
   updateManagerForUser
 } = require('../repositories/UserRepository');
 
-const SECRET_KEY = process.env.JWT_SECRET || 'default_secret_key';
+const SECRET_KEY = process.env.JWT_SECRET;
 
 const userQueue = new Queue('userQueue', { redis: { port: 6380, host: '127.0.0.1' } });
 

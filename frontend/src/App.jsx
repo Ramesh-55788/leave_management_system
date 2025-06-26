@@ -37,7 +37,7 @@ function App() {
           theme="colored"
         />
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/request-leave" element={<RequestLeave />} />
           <Route path="/leave-balance" element={<LeaveBalance />} />

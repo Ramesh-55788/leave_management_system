@@ -64,7 +64,7 @@ function Admin({ user, teamMembers, fetchTeamLeaveData }) {
       setAdminRequests(prevRequests =>
         prevRequests.map(req => req.id === requestId ? { ...req, status: action } : req)
       );
-      notifySuccess(`Request ${action}ed successfully`);
+      notifySuccess(`Request ${action} successfully`);
     } catch (err) {
       notifyError(`Failed to ${action} request`);
     }

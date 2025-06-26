@@ -16,11 +16,11 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.post('/auth/login', { email, password }); // no retry
+      const res = await api.post('/auth/login', { email, password }); 
       login(res.data.user);
       localStorage.setItem('token', res.data.token);
       axios.defaults.headers['Authorization'] = `Bearer ${res.data.token}`;
-      navigate('/');
+      navigate('/home');
     }
     catch (error) {
       console.error('Login error:', error.response?.data);

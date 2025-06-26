@@ -64,6 +64,14 @@ const getUserById = async (id) => {
   });
 };
 
+const getDelUsers = async (limit = 10, offset = 0) => {
+  return userRepo.find({
+    where: { isDeleted: true },
+    take: limit,
+    skip: offset,
+  });
+};
+
 module.exports = {
   getAllUsers,
   createUser,
